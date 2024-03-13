@@ -21,3 +21,6 @@ A project that aims to create an application that allows the user to create thei
 **Contact with client:**
 - Maja Czarnecka
 
+## Jira
+  https://jwegrzynek.atlassian.net/jira/core/projects/GP2023/board
+
