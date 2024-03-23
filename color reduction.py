@@ -50,3 +50,7 @@ for i in range(image_shape[0] - 1):
 # noiseless_image_colored = cv2.fastNlMeansDenoisingColored(result_image,None,20,20,7,21)
 
 result = cv2.imwrite('../coloring-by-numbers/images/result.jpg', result_image)
+
+plt.figure(figsize=(32, 18))
+plt.imshow(borders)
+plt.show()
