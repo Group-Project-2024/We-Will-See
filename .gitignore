@@ -160,4 +160,4 @@ cython_debug/
 .idea/
 
 # Jupyter notebooks
-.ipynb
+*.ipynb
