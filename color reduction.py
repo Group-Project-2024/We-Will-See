@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 from skimage.morphology import skeletonize
-from scipy.ndimage import distance_transform_edt
+from scipy.ndimage import distance_transform_edt, binary_erosion, binary_dilation
 
 original_image = cv2.imread("../coloring-by-numbers/images/jakub.jpg")
 img = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
@@ -77,6 +77,12 @@ result = cv2.imwrite('../coloring-by-numbers/images/result_median.jpg', result_i
 # Using skimage
 skeleton = skeletonize(borders)
 
+# Perform erosion
+eroded_matrix = binary_erosion(skeleton, structure=np.ones((3,3)))
+
+# Perform dilation to restore some size
+dilated_matrix = binary_dilation(eroded_matrix, structure=np.ones((3,3)))
+
 # # Scipy Image
 # # Calculate the distance transform
 # dist_transform = distance_transform_edt(skeleton)
@@ -86,5 +92,5 @@ skeleton = skeletonize(borders)
 
 
 plt.figure(figsize=(32, 18))
-plt.imshow(skeleton)
+plt.imshow(dilated_matrix)
 plt.show()
