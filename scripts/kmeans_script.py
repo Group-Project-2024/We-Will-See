@@ -7,7 +7,7 @@ from collections import Counter, defaultdict, namedtuple
 Configure settings here
 """
 
-INFILE = "../images/jakub.jpg"
+INFILE = "../images/karola.jpg"
 OUTFILE_STEM = "out"
 P = 17
 N = 300

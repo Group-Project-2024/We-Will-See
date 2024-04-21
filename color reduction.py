@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from skimage.morphology import skeletonize
 from scipy.ndimage import distance_transform_edt, binary_erosion, binary_dilation
 
-original_image = cv2.imread("../coloring-by-numbers/images/jakub.jpg")
+original_image = cv2.imread("../coloring-by-numbers/images/love.jpeg")
 img = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
 
 # tsza gdzieś tu dorobić zmniejszanie obrazka bo dla takich dużcyh 4000x3000 długo mieli długo z 2,5 min
@@ -25,22 +25,22 @@ attempts = 10
 vectorized = output.reshape((-1, 3))
 vectorized = np.float32(vectorized)
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-K = 17  # (default = 17)
+K = 25  # (default = 17)
 ret, label, center = cv2.kmeans(vectorized, K, None, criteria, attempts, cv2.KMEANS_PP_CENTERS)
 center = np.uint8(center)
 res = center[label.flatten()]
 result_image = res.reshape(img.shape)
 
-output = cv2.GaussianBlur(result_image, (3, 3), 0)
-
-vectorized = output.reshape((-1, 3))
-vectorized = np.float32(vectorized)
-criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-K = 17  # (default = 17)
-ret, label, center = cv2.kmeans(vectorized, K, None, criteria, attempts, cv2.KMEANS_PP_CENTERS)
-center = np.uint8(center)
-res = center[label.flatten()]
-result_image = res.reshape(img.shape)
+# output = cv2.GaussianBlur(result_image, (3, 3), 0)
+#
+# vectorized = output.reshape((-1, 3))
+# vectorized = np.float32(vectorized)
+# criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+# K = 17  # (default = 17)
+# ret, label, center = cv2.kmeans(vectorized, K, None, criteria, attempts, cv2.KMEANS_PP_CENTERS)
+# center = np.uint8(center)
+# res = center[label.flatten()]
+# result_image = res.reshape(img.shape)
 
 # noiseless_image_colored = cv2.fastNlMeansDenoisingColored(result_image,None,20,20,7,21)
 
@@ -61,7 +61,7 @@ for i in range(image_shape[0] - 1):
             borders[i][j] = 1
 
 
-result = cv2.imwrite('../coloring-by-numbers/images/result_median.jpg', result_image)
+result = cv2.imwrite('../coloring-by-numbers/images/love_median.jpg', result_image)
 
 # # Create a kernel for erosion
 # kernel_size = 3  # This size can be adjusted to control the amount of erosion
@@ -74,14 +74,14 @@ result = cv2.imwrite('../coloring-by-numbers/images/result_median.jpg', result_i
 #borders = borders - thick_borders
 
 
-# Using skimage
-skeleton = skeletonize(borders)
-
-# Perform erosion
-eroded_matrix = binary_erosion(skeleton, structure=np.ones((3,3)))
-
-# Perform dilation to restore some size
-dilated_matrix = binary_dilation(eroded_matrix, structure=np.ones((3,3)))
+# # Using skimage
+# skeleton = skeletonize(borders)
+#
+# # Perform erosion
+# eroded_matrix = binary_erosion(skeleton, structure=np.ones((3,3)))
+#
+# # Perform dilation to restore some size
+# dilated_matrix = binary_dilation(eroded_matrix, structure=np.ones((3,3)))
 
 # # Scipy Image
 # # Calculate the distance transform
@@ -91,6 +91,6 @@ dilated_matrix = binary_dilation(eroded_matrix, structure=np.ones((3,3)))
 # thin_matrix = dist_transform > 0.99  # Adjust the threshold as needed
 
 
-plt.figure(figsize=(32, 18))
-plt.imshow(dilated_matrix)
-plt.show()
+# plt.figure(figsize=(32, 18))
+# plt.imshow(dilated_matrix)
+# plt.show()
