@@ -20,12 +20,12 @@ def get_color(image):
 
 
 colors_path = os.path.join(os.path.dirname(os.getcwd()), "colors")
-color_files = os.listdir(colors_path)
-color_names = [os.path.splitext(file)[0].upper() for file in color_files]
+paint_files = os.listdir(colors_path)
+paint_names = [os.path.splitext(file)[0].upper() for file in paint_files]
 
 rgb_colors = []
 
-for filename in color_files:
+for filename in paint_files:
     file_path = os.path.join(colors_path, filename)
     if os.path.exists(file_path):
         img = cv2.imread(file_path, cv2.IMREAD_COLOR)
@@ -36,7 +36,7 @@ for filename in color_files:
                 rgb_colors.append(dominant_color.tolist())
 
 df = pd.DataFrame({
-    "color_name": color_names,
+    "paint_name": paint_names,
     "rgb": rgb_colors
 })
 
