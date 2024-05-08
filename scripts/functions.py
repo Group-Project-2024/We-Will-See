@@ -44,8 +44,18 @@ def perform_kmeans_clustering(image, k=17, blur=True, blur_effect=11, save=False
 
 
 def return_colors(image):
-    unique_colors = np.unique(image.reshape(-1, 3), axis=0)
-    return unique_colors
+    # Reshape the image to a 2D array where each row represents a color (R, G, B)
+    reshaped_image = image.reshape(-1, 3)
+
+    # Find unique colors and their corresponding counts
+    unique_colors, counts = np.unique(reshaped_image, axis=0, return_counts=True)
+
+    # Sort the unique colors by frequency (descending order)
+    # argsort returns the indices that would sort an array, and we use it on counts
+    sorted_indices = np.argsort(-counts)
+    sorted_colors = unique_colors[sorted_indices]
+
+    return sorted_colors
 
 
 def euclidean_distance(color1, color2):
@@ -97,7 +107,7 @@ def add_numbers_to_borders(kmeans_image, borders, colors):
 
             # Adjust text size based on the radius
             max_val = dist_transform[max_idx]
-            font_scale = min(max_val / 50, 0.5)  # Adjust font size based on distance, but limit to a maximum
+            font_scale = min(max_val / 40, 1)  # Adjust font size based on distance, but limit to a maximum
 
             # Define text and font
             text = f"{i}"
