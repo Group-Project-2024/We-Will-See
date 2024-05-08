@@ -1,7 +1,10 @@
 from __future__ import division
+
+import random
+import time
+from collections import defaultdict
+
 from PIL import Image
-import random, math, time
-from collections import Counter, defaultdict, namedtuple
 
 """
 Configure settings here
@@ -29,68 +32,68 @@ X = range
 
 
 def rgb2xyz(rgb):
-    r, g, b = rgb;
-    r /= 255;
-    g /= 255;
-    b /= 255;
+    r, g, b = rgb
+    r /= 255
+    g /= 255
+    b /= 255
     r = ((r + 0.055) / 1.055) ** 2.4 if r > 0.04045 else r / 12.92
-    g = ((g + 0.055) / 1.055) ** 2.4 if g > 0.04045 else g / 12.92;
+    g = ((g + 0.055) / 1.055) ** 2.4 if g > 0.04045 else g / 12.92
     b = ((b + 0.055) / 1.055) ** 2.4 if b > 0.04045 else b / 12.92
-    r *= 100;
-    g *= 100;
-    b *= 100;
-    x = r * 0.4124 + g * 0.3576 + b * 0.1805;
+    r *= 100
+    g *= 100
+    b *= 100
+    x = r * 0.4124 + g * 0.3576 + b * 0.1805
     y = r * 0.2126 + g * 0.7152 + b * 0.0722
-    z = r * 0.0193 + g * 0.1192 + b * 0.9505;
-    return (x, y, z)
+    z = r * 0.0193 + g * 0.1192 + b * 0.9505
+    return x, y, z
 
 
 def xyz2lab(xyz):
-    x, y, z = xyz;
-    x /= 95.047;
-    y /= 100;
-    z /= 108.883;
+    x, y, z = xyz
+    x /= 95.047
+    y /= 100
+    z /= 108.883
     x = x ** (1 / 3) if x > 0.008856 else 7.787 * x + 16 / 116
-    y = y ** (1 / 3) if y > 0.008856 else 7.787 * y + 16 / 116;
+    y = y ** (1 / 3) if y > 0.008856 else 7.787 * y + 16 / 116
     z = z ** (1 / 3) if z > 0.008856 else 7.787 * z + 16 / 116
-    L = 116 * y - 16;
-    a = 500 * (x - y);
-    b = 200 * (y - z);
-    return (L, a, b)
+    L = 116 * y - 16
+    a = 500 * (x - y)
+    b = 200 * (y - z)
+    return L, a, b
 
 
 def rgb2lab(rgb): return xyz2lab(rgb2xyz(rgb))
 
 
 def lab2xyz(lab):
-    L, a, b = lab;
-    y = (L + 16) / 116;
-    x = a / 500 + y;
-    z = y - b / 200;
+    L, a, b = lab
+    y = (L + 16) / 116
+    x = a / 500 + y
+    z = y - b / 200
     y = y ** 3 if y ** 3 > 0.008856 else (y - 16 / 116) / 7.787
-    x = x ** 3 if x ** 3 > 0.008856 else (x - 16 / 116) / 7.787;
+    x = x ** 3 if x ** 3 > 0.008856 else (x - 16 / 116) / 7.787
     z = z ** 3 if z ** 3 > 0.008856 else (z - 16 / 116) / 7.787
-    x *= 95.047;
-    y *= 100;
-    z *= 108.883;
-    return (x, y, z)
+    x *= 95.047
+    y *= 100
+    z *= 108.883
+    return x, y, z
 
 
 def xyz2rgb(xyz):
-    x, y, z = xyz;
-    x /= 100;
-    y /= 100;
-    z /= 100;
+    x, y, z = xyz
+    x /= 100
+    y /= 100
+    z /= 100
     r = x * 3.2406 + y * -1.5372 + z * -0.4986
-    g = x * -0.9689 + y * 1.8758 + z * 0.0415;
+    g = x * -0.9689 + y * 1.8758 + z * 0.0415
     b = x * 0.0557 + y * -0.2040 + z * 1.0570
-    r = 1.055 * (r ** (1 / 2.4)) - 0.055 if r > 0.0031308 else 12.92 * r;
+    r = 1.055 * (r ** (1 / 2.4)) - 0.055 if r > 0.0031308 else 12.92 * r
     g = 1.055 * (g ** (1 / 2.4)) - 0.055 if g > 0.0031308 else 12.92 * g
-    b = 1.055 * (b ** (1 / 2.4)) - 0.055 if b > 0.0031308 else 12.92 * b;
-    r *= 255;
-    g *= 255;
-    b *= 255;
-    return (r, g, b)
+    b = 1.055 * (b ** (1 / 2.4)) - 0.055 if b > 0.0031308 else 12.92 * b
+    r *= 255
+    g *= 255
+    b *= 255
+    return r, g, b
 
 
 def lab2rgb(lab): rgb = xyz2rgb(lab2xyz(lab));return tuple([int(round(x)) for x in rgb])
