@@ -2,6 +2,8 @@ import numpy as np
 import cv2
 import skimage
 import os
+import ast
+import pandas as pd
 
 
 def create_borders(image):
@@ -63,16 +65,34 @@ def euclidean_distance(color1, color2):
     return np.sqrt(np.sum((np.array(color1, dtype=float) - np.array(color2, dtype=float)) ** 2))
 
 
-def find_closest_colors(image_colors, paint_colors):
+def find_closest_colors(image_colors):
+    paints = pd.read_csv("paints.csv")
+    paint_rgbs = np.array([ast.literal_eval(rgb) for rgb in paints['rgb']])
+
+    available_paints = paint_rgbs.copy()
     closest_colors = []
+
     for image_color in image_colors:
-        # Ensure RGB values are in a suitable numerical format
-        image_color = np.array(image_color, dtype=float)
         distances = [euclidean_distance(image_color, np.array(paint_color, dtype=float)) for paint_color in
-                     paint_colors]
-        closest_color_index = np.argmin(distances)
-        closest_colors.append(paint_colors[closest_color_index])
-    return closest_colors
+                     available_paints]
+
+        if distances:
+            closest_color_index = np.argmin(distances)
+            closest_color = available_paints[closest_color_index]
+            available_paints = np.delete(available_paints, closest_color_index, axis=0)
+            closest_colors.append(closest_color)
+        else:
+            closest_colors.append(None)
+
+    return np.array(closest_colors)
+
+
+def return_paint_names(matching_paints_rgbs):
+    paints = pd.read_csv("paints.csv")
+    paint_names = np.array(paints['paint_name'])
+    paint_rgbs = np.array([ast.literal_eval(rgb) for rgb in paints['rgb']])
+
+    return [paint_names[np.where((paint_rgbs == color).all(axis=1))][0] for color in matching_paints_rgbs]
 
 
 def segment_image(image, n_segments=5000, squared=30):
