@@ -25,6 +25,146 @@ import pandas as pd
 #     return borders
 
 
+def add_numbers_to_borders(kmeans_image, colors):
+    # Prepare the image for drawing (convert single channel mask to BGR if necessary)
+    finished = False
+    borders_with_numbers = np.ones_like(kmeans_image) * 255
+
+    for i, color in enumerate(colors):
+        # Create a mask for the current color
+        mask = cv2.inRange(kmeans_image, color, color)
+        # Find contours in the mask
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        for contour in contours:
+            # Calculate the distance transform of the binary image within the contour
+            mask_contour = np.zeros_like(mask)
+            cv2.drawContours(borders_with_numbers, [contour], 0, (0, 0, 0), thickness=1)
+            cv2.drawContours(mask_contour, [contour], 0, 255, thickness=cv2.FILLED)
+            dist_transform = cv2.distanceTransform(mask_contour, cv2.DIST_L2, 3)
+
+            # Find the indices of the maximum value in the distance transform
+            max_idx = np.unravel_index(np.argmax(dist_transform), dist_transform.shape)
+
+            # Center of the largest inscribed circle
+            cx, cy = max_idx[::-1]  # Reverse the order for (x, y)
+
+            # Adjust text size based on the radius
+            max_val = dist_transform[max_idx]
+            font_scale = min(max_val / 40, 1)  # Adjust font size based on distance, but limit to a maximum
+
+            # Define text and font
+            text = f"{i}"
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_color = (0, 0, 0)  # white text
+
+            # Place text at the circle's center
+            text_size = cv2.getTextSize(text, font, font_scale, 1)[0]
+            text_x = max(10, min(cx - text_size[0] // 2, borders_with_numbers.shape[1] - text_size[0]))
+            text_y = max(text_size[1] + 10, min(cy + text_size[1] // 2, borders_with_numbers.shape[0]))
+            saved_x = text_x
+            saved_y = text_y
+            # Boundary checks for text_x and text_y
+            # if text_x <= 50 or text_x >= (mask.shape[1] - 50) or text_y <= 50 or text_y >= (mask.shape[0] - 50):
+            cv2.putText(borders_with_numbers, text, (text_x, text_y), font, font_scale, font_color, 1, cv2.LINE_AA)
+            # else:
+            #     #try:
+            #     #     while not (mask[text_y - 1][text_x - 1] == 255 and
+            #     #                mask[text_y + text_size[1] - 1 - 1][text_x - 1] == 255 and
+            #     #                mask[text_y - 1][text_x + text_size[0] - 1 - 1] == 255 and
+            #     #                mask[text_y + text_size[1] - 1 - 1][text_x + text_size[0] - 1 - 1] == 255):
+            #     #         text_x += 5
+            #     #         text_y += 5
+            #     #
+            #     # except IndexError:
+            #     #     text_x = saved_x
+            #     #     text_y = saved_y
+            #     #
+            #     # try:
+            #     #     while not (mask[text_y - 1][text_x - 1] == 255 and
+            #     #                mask[text_y + text_size[1] - 1 - 1][text_x - 1] == 255 and
+            #     #                mask[text_y - 1][text_x + text_size[0] - 1 - 1] == 255 and
+            #     #                mask[text_y + text_size[1] - 1 - 1][text_x + text_size[0] - 1 - 1] == 255):
+            #     #         text_x += 5
+            #     #         text_y -= 5
+            #     #
+            #     # except IndexError:
+            #     #     text_x = saved_x
+            #     #     text_y = saved_y
+            #     #
+            #     # try:
+            #     #     while not (mask[text_y - 1][text_x - 1] == 255 and
+            #     #                mask[text_y + text_size[1] - 1 - 1][text_x - 1] == 255 and
+            #     #                mask[text_y - 1][text_x + text_size[0] - 1 - 1] == 255 and
+            #     #                mask[text_y + text_size[1] - 1 - 1][text_x + text_size[0] - 1 - 1] == 255):
+            #     #         text_x -= 5
+            #     #         text_y += 5
+            #     #
+            #     # except IndexError:
+            #     #     text_x = saved_x
+            #     #     text_y = saved_y
+            #
+            #     try:
+            #         while not (mask[text_y - 1][text_x - 1] == 255 and
+            #                    mask[text_y + text_size[1] - 1 - 1][text_x - 1] == 255 and
+            #                    mask[text_y - 1][text_x + text_size[0] - 1 - 1] == 255 and
+            #                    mask[text_y + text_size[1] - 1 - 1][text_x + text_size[0] - 1 - 1] == 255):
+            #             text_x -= 5
+            #             text_y -= 5
+            #
+            #     except IndexError:
+            #         text_x = saved_x
+            #         text_y = saved_y
+            #
+            #     try:
+            #         while not (mask[text_y - 1][text_x - 1] == 255 and
+            #                    mask[text_y + text_size[1] - 1 - 1][text_x - 1] == 255 and
+            #                    mask[text_y - 1][text_x + text_size[0] - 1 - 1] == 255 and
+            #                    mask[text_y + text_size[1] - 1 - 1][text_x + text_size[0] - 1 - 1] == 255):
+            #             text_x += 1
+            #
+            #     except IndexError:
+            #         text_x = saved_x
+            #         text_y = saved_y
+            #
+            #     try:
+            #         while not (mask[text_y - 1][text_x - 1] == 255 and
+            #                    mask[text_y + text_size[1] - 1 - 1][text_x - 1] == 255 and
+            #                    mask[text_y - 1][text_x + text_size[0] - 1 - 1] == 255 and
+            #                    mask[text_y + text_size[1] - 1 - 1][text_x + text_size[0] - 1 - 1] == 255):
+            #             text_x -= 1
+            #
+            #     except IndexError:
+            #         text_x = saved_x
+            #         text_y = saved_y
+            #
+            #     try:
+            #         while not (mask[text_y - 1][text_x - 1] == 255 and
+            #                    mask[text_y + text_size[1] - 1 - 1][text_x - 1] == 255 and
+            #                    mask[text_y - 1][text_x + text_size[0] - 1 - 1] == 255 and
+            #                    mask[text_y + text_size[1] - 1 - 1][text_x + text_size[0] - 1 - 1] == 255):
+            #             text_y += 1
+            #
+            #     except IndexError:
+            #         text_x = saved_x
+            #         text_y = saved_y
+            #
+            #     try:
+            #         while not (mask[text_y - 1][text_x - 1] == 255 and
+            #                    mask[text_y + text_size[1] - 1 - 1][text_x - 1] == 255 and
+            #                    mask[text_y - 1][text_x + text_size[0] - 1 - 1] == 255 and
+            #                    mask[text_y + text_size[1] - 1 - 1][text_x + text_size[0] - 1 - 1] == 255):
+            #             text_y -= 1
+            #
+            #     except IndexError:
+            #         text_x = saved_x
+            #         text_y = saved_y
+            #
+            #     cv2.putText(borders_with_numbers, text, (text_x, text_y), font, font_scale, font_color, 1, cv2.LINE_AA)
+
+    return borders_with_numbers
+
+
 def load_image(path, target_size=1670):
     image = skimage.io.imread(path)
 
