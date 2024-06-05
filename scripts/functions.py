@@ -6,27 +6,52 @@ import ast
 import pandas as pd
 
 
-def create_borders(image):
-    image_shape = image.shape
-    borders = np.zeros((image_shape[0], image_shape[1]))
+# def create_borders(image):
+#     image_shape = image.shape
+#     borders = np.zeros((image_shape[0], image_shape[1]))
+#
+#     # Vertical
+#     for i in range(image_shape[0]):
+#         for j in range(image_shape[1] - 1):
+#             if not np.array_equal(image[i][j], image[i][j + 1]):
+#                 borders[i][j] = 1
+#
+#     # Horizontal
+#     for i in range(image_shape[0] - 1):
+#         for j in range(image_shape[1]):
+#             if not np.array_equal(image[i][j], image[i + 1][j]):
+#                 borders[i][j] = 1
+#
+#     return borders
 
-    # Vertical
-    for i in range(image_shape[0]):
-        for j in range(image_shape[1] - 1):
-            if not np.array_equal(image[i][j], image[i][j + 1]):
-                borders[i][j] = 1
 
-    # Horizontal
-    for i in range(image_shape[0] - 1):
-        for j in range(image_shape[1]):
-            if not np.array_equal(image[i][j], image[i + 1][j]):
-                borders[i][j] = 1
+def load_image(path, target_size=1670):
+    image = skimage.io.imread(path)
 
-    return borders
+    # Get the dimensions of the image
+    height, width = image.shape[:2]
+
+    # Determine the scale factor
+    if height < width:
+        scale_factor = target_size / height
+    else:
+        scale_factor = target_size / width
+
+    # Compute the new dimensions
+    new_height = int(height * scale_factor)
+    new_width = int(width * scale_factor)
+
+    # Resize the image
+    resized_image = skimage.transform.resize(image, (new_height, new_width), anti_aliasing=True)
+
+    if resized_image.dtype != np.uint8:
+        resized_image = (resized_image * 255).astype(np.uint8)
+
+    return resized_image
 
 
 def perform_kmeans_clustering(image, k=17, blur=True, blur_effect=11, save=False,
-                              path=os.path.join(os.path.dirname(__file__), 'segmented.jpg')):
+                              path=os.path.join(os.path.dirname(__file__), 'morze.jpg')):
     if blur is True:
         image = cv2.medianBlur(image, blur_effect)
 
